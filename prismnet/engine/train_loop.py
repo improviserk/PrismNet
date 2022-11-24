@@ -12,7 +12,7 @@ def train(args, model, device, train_loader, criterion, optimizer):
     met = metrics.MLMetrics(objective='binary')
     for batch_idx, (x0, y0) in enumerate(train_loader):
         x, y = x0.float().to(device), y0.to(device).float()
-        if y0.sum() ==0 or y0.sum() ==args.batch_size:
+        if y0.sum() ==0 or y0.sum() ==args.batch_size: # all zero or all one
             continue
         optimizer.zero_grad()
         output = model(x)

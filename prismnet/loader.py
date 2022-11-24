@@ -4,6 +4,9 @@ import numpy as np
 import torch
 import torch.utils.data
 
+
+#final shape NxCx101x5
+#label shape Nx1
 class SeqicSHAPE(torch.utils.data.Dataset):
     def __init__(self, data_path, is_test=False, is_infer=False, use_structure=True):
         """data loader

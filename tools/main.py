@@ -4,6 +4,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim import lr_scheduler
+from torchinfo import summary
+
 
 
 from tensorboardX import SummaryWriter
@@ -18,6 +20,9 @@ from prismnet import train, validate, inference, log_print, compute_saliency, co
 from prismnet.model.utils import GradualWarmupScheduler
 from prismnet.loader import SeqicSHAPE
 from prismnet.utils import datautils
+from prismnet.model.HViT import ViT_RBP_base
+from torchinfo import summary
+from prismnet.model.HViT import ViT_RBP_hybrid
 
 
 def fix_seed(seed):
@@ -154,15 +159,18 @@ def main():
 
 
     print("Network Arch:", args.arch)
-    model = getattr(arch, args.arch)(mode=args.mode)
-    arch.param_num(model)
+    # model = getattr(arch, args.arch)(mode=args.mode)
+    # arch.param_num(model)
     # print(model)
 
-    if args.load_best:
-        filename = model_path.format("best")
-        print("Loading model: {}".format(filename))
-        model.load_state_dict(torch.load(filename,map_location='cpu'))
+    # if args.load_best:
+    #     filename = model_path.format("best")
+    #     print("Loading model: {}".format(filename))
+    #     model.load_state_dict(torch.load(filename,map_location='cpu'))
  
+    # model = ViT_RBP_base()
+    model = ViT_RBP_hybrid()
+    print('model vit')
     model = model.to(device)
     criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(args.pos_weight))
 
@@ -175,6 +183,7 @@ def main():
             batch_size=args.batch_size*8, shuffle=False, **kwargs)
         print("Train set:", len(train_loader.dataset))
         print("Test  set:", len(test_loader.dataset))
+        print('model parameter', summary(model, input_size=(args.batch_size, 1, 100, 5)))
 
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=args.weight_decay)
         scheduler = GradualWarmupScheduler(

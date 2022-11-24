@@ -4,7 +4,6 @@ name=$(basename $work_path)
 # echo `date +%Y%m%d%H%M%S`
 
 p=$1
-d=$2
 
 exp=$name
 
@@ -12,7 +11,7 @@ python -u tools/main.py \
     --train \
     --eval \
     --lr 0.001 \
-    --data_dir data/$d \
+    --data_dir data \
     --p_name $p\
     --out_dir $work_path \
     --exp_name $exp\
