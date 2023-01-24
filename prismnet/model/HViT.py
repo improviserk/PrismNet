@@ -89,7 +89,7 @@ class VisionTransformer(nn.Module):
             )
             self.conv_proj.add_module('bn4', nn.BatchNorm2d(96))
             self.conv_proj.add_module('re4', nn.ReLU(inplace=True))
-            self.conv_proj.add_module(f'conv_11', nn.Conv2d(in_channels=96, out_channels=hidden_dim, kernel_size=1, stride=1))
+            self.conv_proj.add_module(f'conv_last', nn.Conv2d(in_channels=96, out_channels=hidden_dim, kernel_size=1, stride=1))
 
         else:
             self.conv_proj = nn.Conv2d(
@@ -158,6 +158,7 @@ class VisionTransformer(nn.Module):
 
         # (n, c, h, w) -> (n, hidden_dim, n_h, n_w)
         x = self.conv_proj(x)
+        # print(x.shape)
         # (n, hidden_dim, n_h, n_w) -> (n, hidden_dim, (n_h * n_w))
         x = x.reshape(n, self.hidden_dim, n_h * n_w)
 
@@ -187,14 +188,36 @@ class VisionTransformer(nn.Module):
 
         return x
 
-def ViT_RBP_base()->VisionTransformer:
+def ViT_large()->VisionTransformer:
+    model = VisionTransformer(
+        image_size=(101, 5),
+        patch_size=(5, 1),
+        num_layers=12,
+        num_heads=12,
+        hidden_dim=768 ,
+        mlp_dim=3072
+    )
+    return model
+
+def ViT_medium()->VisionTransformer:
     model = VisionTransformer(
         image_size=(101, 5),
         patch_size=(5, 1),
         num_layers=8,
-        num_heads=8,
-        hidden_dim=768 // 2,
-        mlp_dim=3072
+        num_heads=6,
+        hidden_dim= 384,
+        mlp_dim = 1536
+    )
+    return model
+
+def ViT_small() -> VisionTransformer:
+    model = VisionTransformer(
+        image_size=(101, 5),
+        patch_size=(5, 1),
+        num_layers=5,
+        num_heads=4,
+        hidden_dim= 192,
+        mlp_dim = 768
     )
     return model
 
@@ -202,10 +225,10 @@ def ViT_RBP_hybrid()->VisionTransformer:
     model = VisionTransformer(
         image_size=(101, 5),
         patch_size=(5, 1),
-        num_layers=7,
-        num_heads=8,
-        hidden_dim=768 // 2,
-        mlp_dim=3072,
+        num_layers=4,
+        num_heads=4,
+        hidden_dim=192 ,
+        mlp_dim=768,
         conv_config = 1
     )
     return model

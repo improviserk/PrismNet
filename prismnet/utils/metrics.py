@@ -41,6 +41,7 @@ class MLMetrics(object):
         self.tn  = int(self.sum[4])
         self.fp  = int(self.sum[5])
         self.fn  = int(self.sum[6])
+        self.rec = self.tp / (self.tp + self.fn)
         if len(self.avg)>7:
             self.other = self.avg[7:]
 
