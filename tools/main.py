@@ -184,64 +184,64 @@ def main(p, m=None):
 
     # if args.train:
 
-    # train_loader = torch.utils.data.DataLoader(SeqicSHAPE(data_path), \
-    #     batch_size=args.batch_size, shuffle=True,  **kwargs)
+    train_loader = torch.utils.data.DataLoader(SeqicSHAPE(data_path), \
+        batch_size=args.batch_size, shuffle=True,  **kwargs)
     
-    # test_loader  = torch.utils.data.DataLoader(SeqicSHAPE(data_path, is_test=True), \
-    #     batch_size=args.batch_size*8, shuffle=False, **kwargs)
-    # print("Train set:", len(train_loader.dataset))
-    # print("Test  set:", len(test_loader.dataset))
-    # # print('model parameter', summary(model, input_size=(args.batch_size, 1, 100, 5)))
-    # # return
-    # optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001, betas=(0.9, 0.999), weight_decay=1e-6)
-    # scheduler = GradualWarmupScheduler(
-    #     optimizer, multiplier=8, total_epoch=float(args.nepochs), after_scheduler=None)
+    test_loader  = torch.utils.data.DataLoader(SeqicSHAPE(data_path, is_test=True), \
+        batch_size=args.batch_size*8, shuffle=False, **kwargs)
+    print("Train set:", len(train_loader.dataset))
+    print("Test  set:", len(test_loader.dataset))
+    # print('model parameter', summary(model, input_size=(args.batch_size, 1, 100, 5)))
+    # return
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001, betas=(0.9, 0.999), weight_decay=1e-6)
+    scheduler = GradualWarmupScheduler(
+        optimizer, multiplier=8, total_epoch=float(args.nepochs), after_scheduler=None)
 
-    # best_auc = 0
-    # best_acc = 0
-    # best_epoch = 0
-    # train_loss = []
-    # for epoch in range(1, args.nepochs + 1):
-    #     t_met       = train(args, model, device, train_loader, criterion, optimizer)
-    #     v_met, _, _ = validate(args, model, device, test_loader, criterion)
-    #     scheduler.step(epoch)
-    #     lr = scheduler.get_lr()[0]
-    #     color_best='green'
-    #     if best_auc < v_met.auc:
-    #         best_auc = v_met.auc
-    #         best_acc = v_met.acc
-    #         best_epoch = epoch
-    #         color_best = 'red'
-    #         filename = model_path.format("best")
-    #         torch.save(model.state_dict(), filename)
-    #     if epoch - best_epoch > args.early_stopping:
-    #         print("Early stop at %d, %s "%(epoch, args.exp_name))
-    #         break
+    best_auc = 0
+    best_acc = 0
+    best_epoch = 0
+    train_loss = []
+    for epoch in range(1, args.nepochs + 1):
+        t_met       = train(args, model, device, train_loader, criterion, optimizer)
+        v_met, _, _ = validate(args, model, device, test_loader, criterion)
+        scheduler.step(epoch)
+        lr = scheduler.get_lr()[0]
+        color_best='green'
+        if best_auc < v_met.auc:
+            best_auc = v_met.auc
+            best_acc = v_met.acc
+            best_epoch = epoch
+            color_best = 'red'
+            filename = model_path.format("best")
+            torch.save(model.state_dict(), filename)
+        if epoch - best_epoch > args.early_stopping:
+            print("Early stop at %d, %s "%(epoch, args.exp_name))
+            break
 
-    #     if args.tfboard and writer is not None:
-    #         writer.add_scalar('loss/train', t_met.other[0], epoch)
-    #         writer.add_scalar('acc/train', t_met.acc, epoch)
-    #         writer.add_scalar('AUC/train', t_met.auc, epoch)
-    #         writer.add_scalar('lr', lr, epoch)
-    #         writer.add_scalar('loss/test', v_met.other[0], epoch)
-    #         writer.add_scalar('acc/test', v_met.acc, epoch)
-    #         writer.add_scalar('AUC/test', v_met.auc, epoch)
-    #     line='{} \t Train Epoch: {}     avg.loss: {:.4f} Acc: {:.2f}%, AUC: {:.4f} P: {:.4f} R: {:.4f} lr: {:.6f}'.format(\
-    #         args.p_name, epoch, t_met.other[0], t_met.acc, t_met.auc, t_met.prc, t_met.rec, lr)
-    #     log_print(line, color='green', attrs=['bold'])
+        if args.tfboard and writer is not None:
+            writer.add_scalar('loss/train', t_met.other[0], epoch)
+            writer.add_scalar('acc/train', t_met.acc, epoch)
+            writer.add_scalar('AUC/train', t_met.auc, epoch)
+            writer.add_scalar('lr', lr, epoch)
+            writer.add_scalar('loss/test', v_met.other[0], epoch)
+            writer.add_scalar('acc/test', v_met.acc, epoch)
+            writer.add_scalar('AUC/test', v_met.auc, epoch)
+        line='{} \t Train Epoch: {}     avg.loss: {:.4f} Acc: {:.2f}%, AUC: {:.4f} P: {:.4f} R: {:.4f} lr: {:.6f}'.format(\
+            args.p_name, epoch, t_met.other[0], t_met.acc, t_met.auc, t_met.prc, t_met.rec, lr)
+        log_print(line, color='green', attrs=['bold'])
         
-    #     line='{} \t Test  Epoch: {}     avg.loss: {:.4f} Acc: {:.2f}%, AUC: {:.4f} P: {:.4f} R: {:.4f} ({:.4f})'.format(\
-    #         args.p_name, epoch, v_met.other[0], v_met.acc, v_met.auc,v_met.prc, v_met.rec, best_auc)
-    #     log_print(line, color=color_best, attrs=['bold'])
-    #     train_loss.append(t_met.other[0])
+        line='{} \t Test  Epoch: {}     avg.loss: {:.4f} Acc: {:.2f}%, AUC: {:.4f} P: {:.4f} R: {:.4f} ({:.4f})'.format(\
+            args.p_name, epoch, v_met.other[0], v_met.acc, v_met.auc,v_met.prc, v_met.rec, best_auc)
+        log_print(line, color=color_best, attrs=['bold'])
+        train_loss.append(t_met.other[0])
         
-    # print("{} auc: {:.4f} acc: {:.4f}".format(args.p_name, best_auc, best_acc))
-    # print(train_loss)
+    print("{} auc: {:.4f} acc: {:.4f}".format(args.p_name, best_auc, best_acc))
+    print(train_loss)
 
-    # filename = model_path.format("best")
-    # print("Loading model: {}".format(filename))
-    # model.load_state_dict(torch.load(filename))
-    # return best_auc, best_acc, best_epoch
+    filename = model_path.format("best")
+    print("Loading model: {}".format(filename))
+    model.load_state_dict(torch.load(filename))
+    return best_auc, best_acc, best_epoch
 
     
     
